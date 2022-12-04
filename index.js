@@ -7,12 +7,11 @@ initializeApp({
   credential: cert(serviceAccount)
 });
 const db = getFirestore();
-// const path = require("path");
+
 var express = require('express')  
 var app = express()  
 app.set('view engine', 'ejs');
-// app.use(express.static('public'));
-// app.use('/css',express.static(__dirname+'public/css'))
+
 app.get('/', (req, res) => {   
     res.render("home") 
     // res.sendFile(__dirname+"/home.html") 
@@ -29,36 +28,7 @@ app.get('/newContact', (req, res) => {
 app.get('/logoutHome', (req, res)=> {
     res.render("logoutHome");
 });
-// app.use(
-//     "/css",
-//     express.static(path.join(__dirname, "node_modules/bootstrap/dist/css"))
-//   )
-//   app.use(
-//     "/js",
-//     express.static(path.join(__dirname, "node_modules/bootstrap/dist/js"))
-//   )
-//   app.use("/js", express.static(path.join(__dirname, "node_modules/jquery/dist")))
-// app.get('/contacts', (req, res) => {
-    // a =[]  
-    // db.collection("contactsData").get().then((docs)=>{
-    //         // console.log(docs)
-    //         docs.forEach((doc) => {
-    //             Name = doc.data().name
-    //             Phone = doc.data().phone
-    //             EMail=  doc.data().email
-    //             a.push(Name)
-    //             console.log(doc.data().name)
-    //         });
-    //     })
-    // //  db.collection("contactsData").get().forEach(doc => {
-    // //             a.push(doc)
-    // //         })
-    // console.log(a);
-    // console.log({data:a});
-    // const a = doc.data().name() + " "+ doc.data().email+ " "+ doc.data().phone;
 
-    // res.render("contacts", {data:a})
-// });
 app.get('/contacts', (req, res) => {
     var a =[]  
     // var Name = ""
@@ -121,7 +91,6 @@ app.get('/contactSubmit', function (req, res) {
     })
     .then(()=>{
        res.send("contact added sucessfully")
-        // res.render('contacts.ejs');
     });
 }); 
 app.listen(3000, function () {  
