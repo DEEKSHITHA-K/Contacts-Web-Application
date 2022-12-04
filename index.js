@@ -33,15 +33,7 @@ app.get('/contacts', (req, res) => {
     var a =[]  
     // var Name = ""
     db.collection("contactsData").get().then((docs)=>{
-            // console.log(docs)
             docs.forEach((doc) => {
-                // Name = doc.data().name
-                // Phone = doc.data().phone
-                // EMail=  doc.data().email
-                // a = doc.data().name
-                // console.log(type(doc.data().name))
-                // console.log(doc.data().email)
-                // console.log(doc.data().phone)
                 a.push(doc.data())
             });
         })
