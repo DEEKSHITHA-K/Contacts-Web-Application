@@ -1,0 +1,33 @@
+<html>
+    <head>
+
+    </head>
+    <style>
+        .head{
+           background-color: #2d3e50;
+           /* padding-left: 170px; */
+           text-align: center;
+           padding-top: 50px;
+           font-size: larger;
+           font-family: 'Courier New', Courier, monospace;
+        };
+        body{
+            background-color: #2d3e50;
+        }
+    </style>
+    <body>
+        <div class = "head" style="color:white;">
+            <div style="font-size: 40px;">
+                <h1>CONTACTS</h1>
+                </div>
+        <div style="padding-top: 100px;">
+        <% for(var i = 0; i < a.length; i++){
+            %><p style="font-size: 30px;">Name: <%= a[i].name %></p>
+            <p style="font-size: 20px;">Mobile No.: <%= a[i].phone %></p>
+            <p style="font-size: 20px;">E-Mail:  <%= a[i].email %></p>
+            <% } %>
+        </div>
+        <div style = "padding-bottom: 100px;"></div>
+        </div>
+    </body>
+</html>
