@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "build": "netlify deploy --prod",
+  }
   "dependencies": {
     "bootstrap": "^5.2.3",
     "ejs": "^3.1.8",
