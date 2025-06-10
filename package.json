@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "node index.js",
-    "build": "npm run clean && npm run compile",
+    "build": "npm install && netlify-lambda build functions",
     "test": "jest"
   }
 }
