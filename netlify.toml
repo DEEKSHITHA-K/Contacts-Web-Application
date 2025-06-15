@@ -21,8 +21,9 @@
   external_node_modules = ["express", "firebase-admin", "serverless-http", "ejs"]
   # Use esbuild for faster bundling.
   node_bundler = "esbuild"
-  # Set Node.js version (adjust if needed, but Netlify defaults often work)
-  node_version = "18" # Or "20" depending on your preference/compatibility
+  # Removed node_version as it was causing a configuration error.
+  # Netlify will use a default Node.js version if not specified.
+
 
 # Redirects to route all traffic for your API paths to the Netlify Function.
 # This makes it so requests like yourdomain.com/api/hello go to your function.
