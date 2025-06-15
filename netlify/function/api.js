@@ -2,7 +2,8 @@
 // This is the actual Netlify Function handler that wraps your Express app.
 
 const serverless = require('serverless-http');
-const app = require('../../app'); // Adjust the path based on your project structure
+// IMPORTANT: Updated path to point to 'index.js' assuming it's in the project root.
+const app = require('../../index'); 
 
 // The 'handler' export is what Netlify (and AWS Lambda) looks for.
 exports.handler = serverless(app);
@@ -11,4 +12,4 @@ exports.handler = serverless(app);
 // if (process.env.NETLIFY_DEV) {
 //   const port = process.env.PORT || 3000;
 //   app.listen(port, () => console.log(`Local Express server running on port ${port}`));
-// 
+// }
