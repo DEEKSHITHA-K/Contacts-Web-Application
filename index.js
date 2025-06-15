@@ -15,7 +15,7 @@ app.set('view engine', 'ejs');
 // We need to go up one level from the function's location (/var/task/netlify/functions)
 // to reach the project root (/var/task/), then find 'views'.
 // So, it becomes `path.join(__dirname, '..', 'views')`.
-app.set('views', path.join(__dirname, '..', 'views')); // Corrected path resolution
+app.set('views', path.join(__dirname, '..', '..', 'views')) // Corrected path resolution
 
 // Middleware to parse JSON and URL-encoded data
 app.use(express.json());
