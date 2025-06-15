@@ -1,0 +1,34 @@
+# netlify.toml
+
+[build]
+  # Specify the directory where your Netlify Functions are located
+  functions = "netlify/functions"
+  # If you have a static frontend (e.g., HTML, CSS, client-side JS)
+  # that isn't served by your EJS templates, specify its build output directory here.
+  # For EJS, this is typically where your static assets (CSS, JS) would reside.
+  # If all content is served via EJS, you might not need a 'publish' directory for static files,
+  # or you'll need to configure Express to serve static files from a 'public' directory
+  # and ensure that directory is within the function's bundle.
+  # For this setup, we'll assume the EJS views themselves are the primary output.
+  # publish = "public" # Uncomment and adjust if you have a separate static build output
+
+  # Optional: A build command if you have one (e.g., for a frontend framework)
+  # command = "npm run build"
+
+[functions]
+  # Explicitly tell Netlify to bundle these modules with your function.
+  # This is crucial for larger dependencies like 'express' and '@google-cloud/firestore'.
+  external_node_modules = ["express", "firebase-admin", "serverless-http", "ejs"]
+  # Use esbuild for faster bundling.
+  node_bundler = "esbuild"
+  # Set Node.js version (adjust if needed, but Netlify defaults often work)
+  node_version = "18" # Or "20" depending on your preference/compatibility
+
+# Redirects to route all traffic for your API paths to the Netlify Function.
+# This makes it so requests like yourdomain.com/api/hello go to your function.
+# Since your Express app handles all rendering, we'll redirect everything to the function.
+[[redirects]]
+  from = "/*" # Redirect all incoming requests
+  to = "/.netlify/functions/api/:splat" # To your Netlify Function entry point
+  status = 200 # Return a 200 OK status
+  force = true # Force the redirect even if a static file exists at the path
