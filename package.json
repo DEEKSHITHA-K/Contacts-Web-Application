@@ -5,10 +5,5 @@
     "express": "^4.18.2",
     "firebase-admin": "^11.3.0",
     "jquery": "^3.6.1"
-  },
-  "scripts": {
-    "start": "node index.js",
-    "build": "npm install && netlify-lambda build functions",
-    "test": "jest"
   }
 }
