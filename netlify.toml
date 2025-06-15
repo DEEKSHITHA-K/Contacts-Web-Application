@@ -12,8 +12,8 @@
   # For this setup, we'll assume the EJS views themselves are the primary output.
   # publish = "public" # Uncomment and adjust if you have a separate static build output
 
-  # Optional: A build command if you have one (e.g., for a frontend framework)
-  # command = "npm run build"
+  # Removed the explicit 'command' from the [build] section.
+  # Netlify automatically handles building and deploying functions based on the 'functions' directory.
 
 [functions]
   # Explicitly tell Netlify to bundle these modules with your function.
@@ -21,7 +21,7 @@
   external_node_modules = ["express", "firebase-admin", "serverless-http", "ejs"]
   # Use esbuild for faster bundling.
   node_bundler = "esbuild"
-  # Removed node_version as it was causing a configuration error.
+  # Removed node_version as it was causing a configuration error in a previous attempt.
   # Netlify will use a default Node.js version if not specified.
 
 
