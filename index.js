@@ -8,8 +8,14 @@ const app = express();
 
 // Set the view engine to EJS
 app.set('view engine', 'ejs');
-// Configure the views directory. This assumes your 'views' folder is at the project root.
-app.set('views', path.join(__dirname, 'views'));
+// Configure the views directory.
+// IMPORTANT CHANGE: Adjust the path to correctly find 'views' relative to the project root.
+// In a Netlify Function, __dirname refers to the function's directory,
+// but the 'views' folder is at the project root.
+// We need to go up one level from the function's location (/var/task/netlify/functions)
+// to reach the project root (/var/task/), then find 'views'.
+// So, it becomes `path.join(__dirname, '..', 'views')`.
+app.set('views', path.join(__dirname, '..', 'views')); // Corrected path resolution
 
 // Middleware to parse JSON and URL-encoded data
 app.use(express.json());
