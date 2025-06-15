@@ -1,8 +1,8 @@
-// app.js
+// index.js
 const express = require('express');
-const path = require('path'); // Required for path resolution
-const admin = require('firebase-admin'); // For Firebase Admin SDK
-const serverless = require('serverless-http'); // For wrapping the Express app
+const path = require('path');
+const admin = require('firebase-admin');
+const serverless = require('serverless-http'); // Although this is used in api.js, it's good to keep track of its presence.
 
 const app = express();
 
@@ -12,42 +12,71 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // Middleware to parse JSON and URL-encoded data
-// Your current code uses req.query for form submissions.
-// For POST requests and more secure form handling, you would typically use:
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // For parsing x-www-form-urlencoded
 
 // --- Firebase Admin SDK Initialization ---
-// IMPORTANT: NEVER hardcode your service account key or include the JSON file
-// in your repository for production environments.
-// Use environment variables on Netlify.
+console.log("Attempting Firebase initialization...");
+
 if (process.env.NODE_ENV === 'production') {
-    // For production on Netlify, credentials will come from environment variables.
-    // The private_key needs special handling for newline characters.
-    admin.initializeApp({
-        credential: admin.credential.cert({
-            projectId: process.env.FIREBASE_PROJECT_ID,
-            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-            // Replace escaped newlines with actual newlines
-            privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
-        })
-    });
+    console.log("Running in PRODUCTION environment.");
+    const projectId = process.env.FIREBASE_PROJECT_ID;
+    const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+    // Attempt to handle private key newlines
+    const privateKey = process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : null;
+
+    console.log(`Firebase Project ID: ${projectId ? 'Set' : 'NOT SET'}`);
+    console.log(`Firebase Client Email: ${clientEmail ? 'Set' : 'NOT SET'}`);
+    console.log(`Firebase Private Key length: ${privateKey ? privateKey.length : 'NOT SET'}`);
+    if (privateKey && privateKey.length > 50) { // Basic check for plausible length
+        console.log("Firebase Private Key appears to have content.");
+        console.log("First 50 chars of Private Key:", privateKey.substring(0, 50));
+    } else {
+        console.warn("Firebase Private Key seems short or missing.");
+    }
+
+    if (projectId && clientEmail && privateKey) {
+        try {
+            admin.initializeApp({
+                credential: admin.credential.cert({
+                    projectId: projectId,
+                    clientEmail: clientEmail,
+                    privateKey: privateKey
+                })
+            });
+            console.log("Firebase initialized successfully for PRODUCTION.");
+        } catch (error) {
+            console.error("Firebase initialization FAILED in PRODUCTION block:", error.message);
+            // Re-throw or handle error appropriately if app cannot function without Firebase
+            throw new Error(`Firebase initialization failed: ${error.message}`);
+        }
+    } else {
+        const missing = [];
+        if (!projectId) missing.push("FIREBASE_PROJECT_ID");
+        if (!clientEmail) missing.push("FIREBASE_CLIENT_EMAIL");
+        if (!privateKey) missing.push("FIREBASE_PRIVATE_KEY");
+        console.error(`Missing Firebase environment variables: ${missing.join(', ')}`);
+        throw new Error(`Firebase initialization skipped due to missing environment variables: ${missing.join(', ')}`);
+    }
+
 } else {
-    // For local development, you can still use your serviceAccountKey.json file.
-    // Ensure this file is NOT committed to your Git repository (add it to .gitignore).
+    console.log("Running in DEVELOPMENT environment.");
     try {
         const serviceAccount = require("./serviceAccountKey.json");
         admin.initializeApp({
             credential: admin.credential.cert(serviceAccount)
         });
-        console.log("Firebase initialized using local serviceAccountKey.json");
+        console.log("Firebase initialized successfully using local serviceAccountKey.json.");
     } catch (error) {
-        console.warn("serviceAccountKey.json not found. Ensure it's present for local dev or set up environment variables.");
-        console.error("Firebase initialization failed:", error.message);
+        console.warn("serviceAccountKey.json not found or invalid for local dev. Ensure it's present or set up local environment variables.");
+        console.error("Firebase initialization FAILED in DEVELOPMENT block:", error.message);
+        throw new Error(`Firebase local initialization failed: ${error.message}`);
     }
 }
 
+// This line will only be reached if initializeApp() was successful.
 const db = admin.firestore();
+console.log("Firestore instance obtained.");
 // --- End Firebase Admin SDK Initialization ---
 
 
@@ -82,7 +111,6 @@ app.get('/contacts', (req, res) => {
             docs.forEach((doc) => {
                 contactsArray.push(doc.data());
             });
-            // Render the 'contacts' EJS template with the fetched data
             res.render("contacts", { a: contactsArray });
         })
         .catch(error => {
@@ -92,8 +120,6 @@ app.get('/contacts', (req, res) => {
 });
 
 // Route for signup form submission
-// Note: Using GET for sensitive data (password) is not recommended.
-// Consider converting this to a POST request and using req.body.
 app.get('/signupSubmit', function (req, res) {
     const name = req.query.name;
     const email = req.query.email;
@@ -105,7 +131,6 @@ app.get('/signupSubmit', function (req, res) {
         password: password,
     })
         .then(() => {
-            // Redirect to login page after successful signup
             res.render("login");
         })
         .catch(error => {
@@ -115,8 +140,6 @@ app.get('/signupSubmit', function (req, res) {
 });
 
 // Route for login form submission
-// Note: Using GET for sensitive data (password) is not recommended.
-// Consider converting this to a POST request and using req.body.
 app.get('/loginSubmit', function (req, res) {
     const email = req.query.em;
     const password = req.query.pwd;
@@ -127,10 +150,8 @@ app.get('/loginSubmit', function (req, res) {
         .get()
         .then((docs) => {
             if (docs.size > 0) {
-                // If login successful, render loginHome.ejs
                 res.render('loginHome.ejs');
             } else {
-                // If login failed, send a message
                 res.send("Login failed: Invalid email or password.");
             }
         })
@@ -162,6 +183,5 @@ app.get('/contactSubmit', function (req, res) {
 
 // --- End Express Routes ---
 
-// Wrap the Express app with serverless-http for Netlify Functions
-// This exports a handler function that Netlify will execute.
-module.exports.handler = serverless(app);
+// Export the Express app for serverless-http wrapper
+module.exports = app;
