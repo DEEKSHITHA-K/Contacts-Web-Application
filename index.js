@@ -18,13 +18,14 @@ app.use(express.urlencoded({ extended: true })); // For parsing x-www-form-urlen
 // --- Firebase Admin SDK Initialization ---
 console.log("Attempting Firebase initialization...");
 
-if (process.env.NODE_ENV === 'production') {
-    console.log("Running in PRODUCTION environment.");
-    const projectId = process.env.FIREBASE_PROJECT_ID;
-    const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-    // Attempt to handle private key newlines
-    const privateKey = process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : null;
+const projectId = process.env.FIREBASE_PROJECT_ID;
+const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+// Attempt to handle private key newlines
+const privateKey = process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : null;
 
+// Check if environment variables for production are set
+if (projectId && clientEmail && privateKey) {
+    console.log("Found Firebase environment variables. Initializing for PRODUCTION context.");
     console.log(`Firebase Project ID: ${projectId ? 'Set' : 'NOT SET'}`);
     console.log(`Firebase Client Email: ${clientEmail ? 'Set' : 'NOT SET'}`);
     console.log(`Firebase Private Key length: ${privateKey ? privateKey.length : 'NOT SET'}`);
@@ -35,40 +36,31 @@ if (process.env.NODE_ENV === 'production') {
         console.warn("Firebase Private Key seems short or missing.");
     }
 
-    if (projectId && clientEmail && privateKey) {
-        try {
-            admin.initializeApp({
-                credential: admin.credential.cert({
-                    projectId: projectId,
-                    clientEmail: clientEmail,
-                    privateKey: privateKey
-                })
-            });
-            console.log("Firebase initialized successfully for PRODUCTION.");
-        } catch (error) {
-            console.error("Firebase initialization FAILED in PRODUCTION block:", error.message);
-            // Re-throw or handle error appropriately if app cannot function without Firebase
-            throw new Error(`Firebase initialization failed: ${error.message}`);
-        }
-    } else {
-        const missing = [];
-        if (!projectId) missing.push("FIREBASE_PROJECT_ID");
-        if (!clientEmail) missing.push("FIREBASE_CLIENT_EMAIL");
-        if (!privateKey) missing.push("FIREBASE_PRIVATE_KEY");
-        console.error(`Missing Firebase environment variables: ${missing.join(', ')}`);
-        throw new Error(`Firebase initialization skipped due to missing environment variables: ${missing.join(', ')}`);
-    }
-
-} else {
-    console.log("Running in DEVELOPMENT environment.");
     try {
+        admin.initializeApp({
+            credential: admin.credential.cert({
+                projectId: projectId,
+                clientEmail: clientEmail,
+                privateKey: privateKey
+            })
+        });
+        console.log("Firebase initialized successfully for PRODUCTION context.");
+    } catch (error) {
+        console.error("Firebase initialization FAILED in PRODUCTION block:", error.message);
+        throw new Error(`Firebase initialization failed with environment variables: ${error.message}`);
+    }
+} else {
+    // If environment variables are not set, assume local development
+    console.log("Firebase environment variables NOT found. Attempting local DEVELOPMENT initialization.");
+    try {
+        // Ensure serviceAccountKey.json exists locally and is in .gitignore
         const serviceAccount = require("./serviceAccountKey.json");
         admin.initializeApp({
             credential: admin.credential.cert(serviceAccount)
         });
         console.log("Firebase initialized successfully using local serviceAccountKey.json.");
     } catch (error) {
-        console.warn("serviceAccountKey.json not found or invalid for local dev. Ensure it's present or set up local environment variables.");
+        console.warn("serviceAccountKey.json not found or invalid for local dev. Ensure it's present for local dev.");
         console.error("Firebase initialization FAILED in DEVELOPMENT block:", error.message);
         throw new Error(`Firebase local initialization failed: ${error.message}`);
     }
